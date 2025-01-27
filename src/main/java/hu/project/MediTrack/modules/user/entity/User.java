@@ -1,18 +1,11 @@
-
 package hu.project.MediTrack.modules.user.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import hu.project.MediTrack.modules.user.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-/**
- * JPA Entity, mely a "users" táblát reprezentálja az adatbázisban.
- * A mezőket a projekt igényeire szabhatod.
- */
 @Entity
 @Table(name = "users")
 @Setter
