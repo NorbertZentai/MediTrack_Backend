@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: hu.project.MediTrack.MediTrackApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.792 s -- in hu.project.MediTrack.MediTrackApplicationTests

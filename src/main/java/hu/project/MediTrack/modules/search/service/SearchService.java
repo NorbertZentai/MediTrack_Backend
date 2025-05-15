@@ -1,47 +1,53 @@
 package hu.project.MediTrack.modules.search.service;
 
-import hu.project.MediTrack.modules.search.entity.Search;
-import hu.project.MediTrack.modules.search.repository.SearchRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import hu.project.MediTrack.modules.search.dto.MedicationSearchRequest;
+import hu.project.MediTrack.modules.search.dto.MedicationSearchResult;
+import hu.project.MediTrack.modules.search.util.MedicationParser;
+import hu.project.MediTrack.modules.search.util.OgyeiRequestHelper;
+import hu.project.MediTrack.modules.search.util.SearchUrlBuilder;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.io.IOException;
+import java.util.*;
 
 @Service
 public class SearchService {
 
-    @Autowired
-    private SearchRepository searchRepository;
+    private static final int MAX_RESULTS = 100;
+    private static final int PAGE_SIZE = 20;
 
-    public List<Search> findAll() {
-        return searchRepository.findAll();
-    }
+    public List<MedicationSearchResult> searchMedications(MedicationSearchRequest params) {
+        try {
+            Map<String, String> sessionData = OgyeiRequestHelper.fetchSessionAndCsrfToken();
+            String phpsessid = sessionData.get("PHPSESSID");
+            String csrft = sessionData.get("csrft");
 
-    public Optional<Search> findById(Integer id) {
-        return searchRepository.findById(id);
-    }
+            List<MedicationSearchResult> allResults = new ArrayList<>();
 
-    public Search saveSearch(Search search) {
-        // Itt végezhetsz pl. validálást, logolást, stb.
-        return searchRepository.save(search);
-    }
+            for (int offset = 0; offset < MAX_RESULTS; offset += PAGE_SIZE) {
+                String url = SearchUrlBuilder.buildSearchUrl(csrft, params, offset);
+                Document doc = OgyeiRequestHelper.fetchSearchResultPage(url, phpsessid);
 
-    public void deleteById(Integer id) {
-        searchRepository.deleteById(id);
-    }
+                Elements rows = doc.select("div.table__line.line");
+                if (rows.isEmpty()) break;
 
-    /**
-     * Példa: Egy user összes keresése.
-     */
-    public List<Search> findByUserId(Integer userId) {
-        return searchRepository.findByUserId(userId);
-    }
+                for (Element row : rows) {
+                    Optional<MedicationSearchResult> result = MedicationParser.parseRow(row);
+                    result.ifPresent(allResults::add);
 
-    /**
-     * Példa: Kulcsszó részlet alapján keresés.
-     */
-    public List<Search> findByKeyword(String keywordPart) {
-        return searchRepository.findByKeywordContainingIgnoreCase(keywordPart);
+                    if (allResults.size() >= MAX_RESULTS) {
+                        return allResults;
+                    }
+                }
+            }
+
+            return allResults;
+
+        } catch (IOException e) {
+            throw new RuntimeException("Nem sikerült lekérni az adatokat", e);
+        }
     }
 }

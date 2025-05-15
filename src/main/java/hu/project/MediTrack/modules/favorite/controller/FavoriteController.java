@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * REST Controller a Favorites kezeléséhez.
+ * REST controller a Favorites kezeléséhez.
  * A React Native (vagy más) kliens hívja JSON kérésekkel.
  */
 @RestController

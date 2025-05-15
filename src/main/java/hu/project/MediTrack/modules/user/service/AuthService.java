@@ -26,14 +26,8 @@ public class AuthService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public void register(User user) {
-        System.out.println("Kapott adatok: " + user.getPassword());
-
-        if (user.getPassword() == null || user.getPassword().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error: Password cannot be null or empty!");
-        }
-
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+    public User register(User user) {
+        if (userRepository.findByName(user.getEmail()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error: Email is already in use!");
         }
 
@@ -43,24 +37,30 @@ public class AuthService {
         user.setLast_login(java.time.LocalDateTime.now());
         user.setIs_active(true);
 
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
-    public User login(String email, String password) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email, password)
-        );
+    public User login(String username, String password) {
+        try {
+            System.out.println("🔐 Login attempt: " + username);
 
-        org.springframework.security.core.userdetails.User userDetails =
-                (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(username, password)
+            );
 
-        return userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+            org.springframework.security.core.userdetails.User userDetails =
+                    (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
+
+            return userRepository.findByName(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+        } catch (Exception ex) {
+            System.err.println("❌ Login failed: " + ex.getMessage());
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Hibás email vagy jelszó.");
+        }
     }
 
-    // Aktuális felhasználó lekérése
     public User getCurrentUser(String email) {
-        return userRepository.findByEmail(email)
+        return userRepository.findByName(email)
                 .orElseThrow(() -> new RuntimeException("Error: User not found."));
     }
 }

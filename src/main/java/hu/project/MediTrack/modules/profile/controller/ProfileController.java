@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * REST Controller a Profile entitáshoz.
+ * REST controller a Profile entitáshoz.
  * A React Native kliens ezen a végponton keresztül érheti el a profil-adatokat.
  */
 @RestController

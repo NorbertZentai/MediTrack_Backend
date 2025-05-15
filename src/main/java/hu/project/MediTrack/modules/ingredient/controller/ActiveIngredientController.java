@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * REST Controller a "active_ingredients" kezeléséhez.
+ * REST controller a "active_ingredients" kezeléséhez.
  * A React Native (vagy más) kliens JSON kérésekkel használhatja.
  */
 @RestController

@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class HazipatikaSearchTextResponse {
+public class HazipatikaResponse {
     private String title;
     private String url;
     private List<Section> sections;
